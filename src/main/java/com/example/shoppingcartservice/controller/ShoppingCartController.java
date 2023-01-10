@@ -1,7 +1,7 @@
 package com.example.shoppingcartservice.controller;
 
 
-import com.example.shoppingcartservice.model.ShoppingCartItemDTO;
+import com.example.shoppingcartservice.model.ItemQuantityDTO;
 import com.example.shoppingcartservice.service.ShoppingCartItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,8 +20,8 @@ public class ShoppingCartController implements ShoppingCartOperations {
         this.shoppingCartItemService = shoppingCartItemService;
     }
 
-    public ShoppingCartItemDTO fetchShoppingCartContent(String user) {
-        ShoppingCartItemDTO itemsWithQuantity;
+    public ItemQuantityDTO fetchShoppingCartContent(String user) {
+        ItemQuantityDTO itemsWithQuantity;
 
         try {
             itemsWithQuantity = shoppingCartItemService.fetchItemsOfUser(user);

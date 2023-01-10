@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.HashMap;
 
 @Data
-public class ShoppingCartItemDTO {
+public class ItemQuantityDTO {
 
     private HashMap<Integer, Integer> itemsFromShoppingCart;
 }

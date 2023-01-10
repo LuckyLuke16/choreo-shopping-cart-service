@@ -1,9 +1,11 @@
 package com.example.shoppingcartservice.service;
 
 import com.example.shoppingcartservice.exception.NoItemsFoundException;
-import com.example.shoppingcartservice.model.ShoppingCartItemDTO;
+import com.example.shoppingcartservice.model.ItemQuantityDTO;
+import com.example.shoppingcartservice.model.order.OrderDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -25,7 +27,7 @@ public class AmqpConsumer {
     }
 
     @RabbitListener(queues = "#{addQueue.name}")
-    public void addItemToCart(String id, Message message){
+    public void addItemToCart(String id, Message message) {
         try {
             int itemId = Integer.parseInt(id);
             String userId = message.getMessageProperties().getMessageId();
@@ -36,7 +38,7 @@ public class AmqpConsumer {
     }
 
     @RabbitListener(queues = "#{deleteQueue.name}")
-    public void deleteItemFromCart(String id, Message message){
+    public void deleteItemFromCart(String id, Message message) {
         try {
             int itemId = Integer.parseInt(id);
             String userId = message.getMessageProperties().getMessageId();
@@ -46,29 +48,25 @@ public class AmqpConsumer {
         }
     }
 
-//    @RabbitListener(queues="#{orderItemsQueue.name}")
-//    @SendTo("status")
-//    public Message<String> sendOrderedItems(Message message) {
-//        return
-//    }
-@RabbitListener(queues = "#{orderItemsQueue.name}")
-@SendTo("#{exchange.name}/order.items.queried")
-public org.springframework.messaging.Message<ShoppingCartItemDTO> processOrder(Message message) {
-    MessageProperties messageProperties = message.getMessageProperties();
-    String userId = messageProperties.getMessageId();
-    String correlationId = messageProperties.getCorrelationId();
+    @RabbitListener(queues = "#{orderItemsQueue.name}")
+    @SendTo("#{exchange.name}/order.items.queried")
+    public org.springframework.messaging.Message<OrderDTO> processOrder(OrderDTO orderDetails, Message message) {
+        MessageProperties messageProperties = message.getMessageProperties();
+        String userId = messageProperties.getMessageId();
+        String correlationId = messageProperties.getCorrelationId();
 
-    try {
-        ShoppingCartItemDTO itemsFromUser = this.shoppingCartItemService.fetchItemsOfUser(userId);
+        try {
+            ItemQuantityDTO itemsFromUser = this.shoppingCartItemService.fetchItemsOfUser(userId);
+            orderDetails.setOrderedItems(itemsFromUser);
 
-        return MessageBuilder
-                .withPayload(itemsFromUser)
-                .setHeader("userId", userId)
-                .setHeader("correlationId", correlationId)
-                .build();
-    } catch(Exception e) {
-        logger.warn("Shopping Cart Content for message with correlation id {} could not be fetched", correlationId, e);
-        throw new NoItemsFoundException();
+            return MessageBuilder
+                    .withPayload(orderDetails)
+                    .setHeader("userId", userId)
+                    .setHeader("correlationId", correlationId)
+                    .build();
+        } catch (Exception e) {
+            logger.warn("Shopping Cart Content for message with correlation id {} could not be fetched", correlationId, e);
+            throw new AmqpRejectAndDontRequeueException("Failed to fetch content");
+        }
     }
-}
 }

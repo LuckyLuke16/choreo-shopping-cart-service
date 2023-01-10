@@ -3,7 +3,7 @@ package com.example.shoppingcartservice.service;
 import com.example.shoppingcartservice.exception.CartItemAddingException;
 import com.example.shoppingcartservice.exception.CartItemDeletionException;
 import com.example.shoppingcartservice.exception.NoItemsFoundException;
-import com.example.shoppingcartservice.model.ShoppingCartItemDTO;
+import com.example.shoppingcartservice.model.ItemQuantityDTO;
 import com.example.shoppingcartservice.model.entity.ShoppingCartItem;
 import com.example.shoppingcartservice.model.entity.ShoppingCartItemId;
 import com.example.shoppingcartservice.repository.ShoppingCartItemRepository;
@@ -27,8 +27,8 @@ public class ShoppingCartItemService {
         this.shoppingCartItemRepository = shoppingCartItemRepository;
     }
 
-    public ShoppingCartItemDTO fetchItemsOfUser(String userId) {
-        ShoppingCartItemDTO itemsWithQuantity = new ShoppingCartItemDTO();
+    public ItemQuantityDTO fetchItemsOfUser(String userId) {
+        ItemQuantityDTO itemsWithQuantity = new ItemQuantityDTO();
 
         try {
             List<ShoppingCartItem> itemsFromDB = shoppingCartItemRepository.findByUserId(userId);
@@ -43,8 +43,8 @@ public class ShoppingCartItemService {
         return itemsWithQuantity;
     }
 
-    private ShoppingCartItemDTO itemToShoppingCartItemDTO(List<ShoppingCartItem> itemsFromDB) {
-        ShoppingCartItemDTO itemsWithQuantity = new ShoppingCartItemDTO();
+    private ItemQuantityDTO itemToShoppingCartItemDTO(List<ShoppingCartItem> itemsFromDB) {
+        ItemQuantityDTO itemsWithQuantity = new ItemQuantityDTO();
         itemsWithQuantity.setItemsFromShoppingCart(new HashMap<>());
 
         for(ShoppingCartItem i : itemsFromDB) {
