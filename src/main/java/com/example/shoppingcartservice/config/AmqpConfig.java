@@ -18,6 +18,7 @@ public class AmqpConfig {
     static final String orderItemsQueue = "order-items-queue";
 
     static final String addQueueName = "add-queue";
+    static final String deleteCartQueueName = "delete-cart-queue";
 
     @Bean
     Queue addQueue() {
@@ -27,6 +28,11 @@ public class AmqpConfig {
     @Bean
     Queue deleteQueue() {
         return new Queue(deletionQueueName, true);
+    }
+
+    @Bean
+    Queue deleteCartQueue() {
+        return new Queue(deleteCartQueueName, true);
     }
 
     @Bean
@@ -45,8 +51,18 @@ public class AmqpConfig {
     }
 
     @Bean
+    Binding deleteItemBinding(Queue deleteQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(deleteQueue).to(exchange).with("#.delete");
+    }
+
+    @Bean
     Binding orderItemsBinding(Queue orderItemsQueue, TopicExchange exchange) {
         return BindingBuilder.bind(orderItemsQueue).to(exchange).with("order.received");
+    }
+
+    @Bean
+    Binding deleteCartBinding(Queue deleteCartQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(deleteCartQueue).to(exchange).with("order.saved");
     }
 
     @Bean

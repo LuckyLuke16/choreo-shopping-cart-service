@@ -11,4 +11,6 @@ import java.util.List;
 public interface ShoppingCartItemRepository extends JpaRepository<ShoppingCartItem, ShoppingCartItemId> {
     List<ShoppingCartItem> findByUserId(String userId);
 
+    void deleteAllByUserId(String userId);
+
 }

@@ -69,4 +69,18 @@ public class AmqpConsumer {
             throw new AmqpRejectAndDontRequeueException("Failed to fetch content");
         }
     }
+
+    @RabbitListener(queues = "#{deleteCartQueue.name}")
+    public void deleteCartItemsOfUser(org.springframework.messaging.Message<OrderDTO> orderDetailsMessage){
+        String userId = orderDetailsMessage.getHeaders().get("userId", String.class);
+        String correlationId = orderDetailsMessage.getHeaders().get("correlationId", String.class);
+
+        try {
+            this.shoppingCartItemService.deleteCart(userId);
+        } catch(Exception e) {
+            logger.warn("Shopping Cart items of user {} could not be deleted: correlation id: {}", userId, correlationId, e);
+            throw new AmqpRejectAndDontRequeueException("Cart deletion failed");
+        }
+
+    }
 }
